@@ -33,7 +33,7 @@ select_sequence2= sequences(randperm(length(sequences),3));
         beep =  MakeBeep(select_sequence2(s),1);
         Snd('Open');
         Snd('Play',beep);
-        pause(ITI); %Comment out if you want 1s between each beep
+        %pause(ITI); %Comment out if you want 1s between each beep
 
         end 
     end
