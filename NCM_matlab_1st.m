@@ -55,6 +55,11 @@ ListenChar(2);
 % To do:  get the time stamp at the start of waiting for key input 
 % so we can evaluate timeout and reaction time
 
+% for i = 1:50 trials
+% randomization of where we start in the sequence, so the order of the three stimuli stays the
+% same (i.e. if we have 5 fixed sequences from which we choose a random one
+% for each trial and then vary the start point for the 3 repetitions
+% or vary delay period (might be easier?)
 for i = 1:3
     % To DO: randomization
     seq_1 = PsychPortAudio('FillBuffer', pahandle, [beep1 beep2 beep3; beep1 beep2 beep3]);
