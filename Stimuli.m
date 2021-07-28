@@ -75,7 +75,7 @@ sequences = [100,150,250; 150,200,300;
  
 ITI = 1; %inter trial (sequence) pause
 %ISI = 0.2; %inter stimulus pause 
-trials = 3;
+trials = 4;
 
 %% Key selection
 % improve portability of your code acorss operating systems 
@@ -108,6 +108,10 @@ ListenChar(2);
 %select_sequence2= sequences(randperm(length(sequences),3));
 % Random selecction 2
 
+% whether the correct target tone will be outputted or not
+correct_or_false = [zeros(1, trials / 2) ones(1, trials / 2)]
+correct_or_false = correct_or_false(randperm(length(correct_or_false)));
+
 for k = 1:trials
     ind = ceil(rand * size(sequences,1));
     select_sequence1 = sequences(ind,:); 
@@ -117,13 +121,30 @@ for k = 1:trials
         for s = 1:length(select_sequence1)
             
             beep =  MakeBeep(select_sequence1(s),1);
-           % disp(select_sequence1(s))
+            disp(select_sequence1(s))
             Snd('Open');
             Snd('Play',beep);
         %pause(ISI); %between each beep we may need to change
 
         end
     end
+    
+    is_correct = correct_or_false(k)  == 1
+    % output the correct target tone
+    if is_correct
+        disp('correct')
+        beep =  MakeBeep(select_sequence1(end),1);
+        Snd('Open');
+        Snd('Play',beep)
+    % output the incorrect target tone
+    else
+        beep_num = ceil(rand * 2);
+        disp('incorrect')
+        beep =  MakeBeep(select_sequence1(beep_num),1);
+        Snd('Open');
+        Snd('Play',beep)
+    end
+    
     %disp(target)
     pause(ITI); %1s between each sequence tripple (delay period insert here)
     % tStart can  be the timestamp for the onset of stimuli 
