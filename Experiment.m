@@ -50,13 +50,16 @@ sequences =  [100,150,250;
  
 ITI = 1; %inter trial (sequence) pause
 ISI = 0.2; %inter stimulus pause 
-trials = 1 ; %number of trials
+trials = 2    ; %number of trials
 beepPauseTime = 0.2; %Pause between beeps
 beepLength = 1; %Length of beeps
 
 % Calculate how long the beep and pause are in frames
 beepLengthFrames = round(beepLength / slack);
 beepPauseLengthFrames = round(beepPauseTime / slack);
+
+%Conditions
+conditions = {'PLAY', 'HOLD'};
 
 %% Keyboard
 
@@ -68,6 +71,8 @@ for i = 1:length(responseKeys)
     KbCheckList = [KbName(responseKeys{i}),KbCheckList];
 end
 RestrictKeysForKbCheck(KbCheckList);
+   
+
 
 %% Run experiment 
 % Start screen 
@@ -79,10 +84,17 @@ while 1
     if keyCode(KbName('space'))==1
         break 
     end 
-end 
+end
+
+
+% whether the correct target tone will be outputted or not
+correct_or_false = [zeros(1, trials / 2) ones(1, trials / 2)];
+correct_or_false = correct_or_false(randperm(length(correct_or_false)));
 
 % Run Trials 
-for trial = 1:trials 
+for trial = 1:trials
+%choose condition 
+condition = conditions(randi([1 numel(conditions)]));    
 ind = ceil(rand * size(sequences,1));
 select_sequence1 = sequences(ind,:); 
 select_sequence1 = select_sequence1(randperm(length(select_sequence1)));
@@ -111,19 +123,19 @@ for i = 1:300
     Screen(window1,'FillRect',backgroundColor);
     Screen('Flip', window1);
 end 
-
-end 
-
-%% PLAY Condition
-for i = 1:200
-Screen('DrawText',window1,'PLAY', xCenter, yCenter, textColor);
-Screen('Flip',window1)
+if ismember(condition , 'PLAY')
+    for i = 1:200
+    Screen('DrawText',window1,'PLAY', xCenter, yCenter, textColor);
+    Screen('Flip',window1)
+    end
+else
+    for i = 1:200
+    Screen('DrawText',window1,'HOLD', xCenter, yCenter, textColor);
+    Screen('Flip',window1)
+    end
 end
-for i = 1:200
-%% HOLD Condition
-Screen('DrawText',window1,'HOLD', xCenter, yCenter, textColor);
-Screen('Flip',window1) 
-
 end
-% Clear the screen 
+
+
+%Clear the screen 
 sca;
