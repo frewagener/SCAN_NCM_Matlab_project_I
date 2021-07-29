@@ -59,8 +59,14 @@ beepLengthFrames = round(beepLength / slack);
 beepPauseLengthFrames = round(beepPauseTime / slack);
 
 %Conditions
-conditions = {'PLAY', 'HOLD'};
+conditions = [1; 0]; %1 = PLAY; 0 = HOLD
+cond_vector = zeros(trials,1);
+num = length(cond_vector)/2;
 
+for c = 1:num
+    cond_vector(c) = conditions(1);
+end 
+cond_vector = cond_vector(randperm(length(cond_vector)));
 %% Keyboard
 
 % Keyboard setup
@@ -87,15 +93,12 @@ while 1
 end
 
 
-% whether the correct target tone will be outputted or not
-correct_or_false = [zeros(1, trials / 2) ones(1, trials / 2)];
-correct_or_false = correct_or_false(randperm(length(correct_or_false)));
+
 
 % Run Trials 
 for trial = 1:trials
-%choose condition 
-condition = conditions(randi([1 numel(conditions)]));    
-ind = ceil(rand * size(sequences,1));
+ 
+ ind = ceil(rand * size(sequences,1));
 select_sequence1 = sequences(ind,:); 
 select_sequence1 = select_sequence1(randperm(length(select_sequence1)));
     for i = 1:3
@@ -123,7 +126,7 @@ for i = 1:300
     Screen(window1,'FillRect',backgroundColor);
     Screen('Flip', window1);
 end 
-if ismember(condition , 'PLAY')
+if cond_vector(trial) == 1
     for i = 1:200
     Screen('DrawText',window1,'PLAY', xCenter, yCenter, textColor);
     Screen('Flip',window1)
