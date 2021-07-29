@@ -48,7 +48,7 @@ sequences =  [100,150,250;
                 250,300,350;
                 300,350,450];
  
-ITI = 1; %inter trial (sequence) pause
+ITI = 3; %inter trial (sequence) pause
 ISI = 0.2; %inter stimulus pause 
 trials = 2    ; %number of trials
 beepPauseTime = 0.2; %Pause between beeps
@@ -84,6 +84,7 @@ RestrictKeysForKbCheck(KbCheckList);
 % Start screen 
 Screen('DrawText',window1,'Press the space bar to begin', (W/2-150), (H/2), textColor);
 Screen('Flip',window1)
+
 % Wait for subject to press spacebar
 while 1
     [keyIsDown,secs,keyCode] = KbCheck;
@@ -96,9 +97,8 @@ end
 
 
 % Run Trials 
-for trial = 1:trials
- 
- ind = ceil(rand * size(sequences,1));
+for trial = 1:trials  
+ind = ceil(rand * size(sequences,1));
 select_sequence1 = sequences(ind,:); 
 select_sequence1 = select_sequence1(randperm(length(select_sequence1)));
     for i = 1:3
@@ -115,30 +115,46 @@ select_sequence1 = select_sequence1(randperm(length(select_sequence1)));
         Screen('Flip', window1);
         end
         
-            for pause = 1:beepPauseLengthFrames
+            for pauses = 1:beepPauseLengthFrames
             Screen(window1,'FillRect',backgroundColor);
             Screen('Flip', window1); 
             end 
  
-        end    
-    end 
-for i = 1:300 
-    Screen(window1,'FillRect',backgroundColor);
-    Screen('Flip', window1);
-end 
-if cond_vector(trial) == 1
-    for i = 1:200
+        end
+    end
+    
+ if cond_vector(trial) == 1
+    for j = 1:200
     Screen('DrawText',window1,'PLAY', xCenter, yCenter, textColor);
     Screen('Flip',window1)
     end
 else
-    for i = 1:200
+    for p = 1:200
     Screen('DrawText',window1,'HOLD', xCenter, yCenter, textColor);
     Screen('Flip',window1)
     end
-end
-end
+    
+ end 
+ for delay = 1:9 %We can adjust
+    for k = 1:beepLengthFrames
+    Screen('DrawLines', window1, allCoords, lineWidthPix, [250 250 250], [xCenter yCenter]);
+    % Flip to the screen
+    Screen('Flip', window1);
+    end
 
-
+    for pauses = 1:beepPauseLengthFrames
+    Screen(window1,'FillRect',backgroundColor);
+    Screen('Flip', window1); 
+    end 
+ end
+target = select_sequence1(end);
+beep =  MakeBeep(target,1);
+disp(target)
+Snd('Open');
+Snd('Play',beep);
+pause(ITI);
+%Insert response here
+end
+ 
 %Clear the screen 
 sca;
