@@ -1,9 +1,10 @@
+function NCM_final()
 % start by clearing screen and workspace
 clearvars;
 close all;
 clear all; 
 sca;
-
+log_file = Participant_input()
 %% *******************************************************************
 %                       INTRODUCTION
 %*********************************************************************
@@ -130,9 +131,9 @@ clear Timing Trials i Init_Break ITI correct refphase stimphase condition;
 
 
 %% MATLAB-LOGFILE of response collection & design matrix
-log_aud.date         = date;
-log_aud.time         = clock;
-log_aud.responses    = zeros(7,30); 
+log_file.date         = date;
+log_file.time         = clock;
+log_file.responses    = zeros(7,30); 
 % 1: RT 
 % 2: correct or incorrect target (1 or 0)
 % 3: response key (right arrow = 1, left arrow = 0)
@@ -141,10 +142,10 @@ log_aud.responses    = zeros(7,30);
 % 6: time-out?
 % 7: subject ID
 
-subject_no    = 2;  
-subject_name  = 'SJ02';
+subject_no    = log_file.subjnum;  
+subject_name  = sprintf('SJ0%d', subject_no);
 log_path  = fullfile(pwd, [subject_name, '_Response.mat']);
-save(log_path, 'log_aud'); %saving response collection
+save(log_path, 'log_file'); %saving response collection
 design_path = fullfile(pwd, [subject_name, '_trial_info.mat']);
 save(design_path, 'design_mat') %saving design matrix 
 
@@ -368,7 +369,7 @@ for t = 1:1%length(design_mat)
         end
         % Start screen 
        % Screen('DrawText',window,'Press the space bar to begin', (xCenter), (yCenter), textColor);
-        DrawFormattedText(window, 'Press the space bar to begin', (xCenter-300), (yCenter), textColor);
+        DrawFormattedText(window, 'Left arrow = Mismatch \n Right arrow = Match \n Press the space bar to begin', (xCenter-300), (yCenter), textColor);
         Screen('Flip',window)
         % Wait for subject to press spacebar
         while 1
@@ -423,11 +424,11 @@ for t = 1:1%length(design_mat)
                    % Draw the CONDITION CUE
                    if current_trial(6) == 1 %play condition 
                    
-                       DrawFormattedText(window, 'PLAY', 'center', 'center', [0.5 0.5 0.5]);
+                       DrawFormattedText(window, 'PLAY', 'center', 'center',textColor);
                        
                    else
                        
-                       DrawFormattedText(window, 'HOLD', 'center', 'center', [0.5 0.5 0.5]);
+                       DrawFormattedText(window, 'HOLD', 'center', 'center', textColor);
                     
                    end    
                     % Flip to the screen
@@ -519,7 +520,7 @@ for t = 1:1%length(design_mat)
             for i = 1:numQuestion
                 
                  % Draw text
-                DrawFormattedText(window, '?', 'center', 'center', [0.5 0.5 0.5]);
+                DrawFormattedText(window, '?', 'center', 'center', textColor);
 
                 % Flip to the screen
                 Screen('Flip', window);
@@ -532,16 +533,16 @@ for t = 1:1%length(design_mat)
                     % a valid key was pressed so we didn't time out
                     timedout = false;
                       
-                    log_aud.responses(1,t) = toc - tStart; % time
-                    log_aud.responses(3,t) = (KbName(keyCode) == "RightArrow"); % recording 1 for right and 0 for left arrow
+                    log_file.responses(1,t) = toc - tStart; % time
+                    log_file.responses(3,t) = (KbName(keyCode) == "RightArrow"); % recording 1 for right and 0 for left arrow
                     if (KbName(keyCode) == "RightArrow" && current_trial(5) == 1) || (KbName(keyCode) == "LeftArrow" && current_trial(5) == 0)
-                        log_aud.responses(4,t) = 1; %  correct response, 1 forr acc
+                        log_file.responses(4,t) = 1; %  correct response, 1 forr acc
                     else
-                        log_aud.responses(4,t) = 0; % incorrect response, 0 for no accuracy
+                        log_file.responses(4,t) = 0; % incorrect response, 0 for no accuracy
                     end
-                    log_aud.responses(2,t) = current_trial(5); % stimuli is the correct target
-                    log_aud.responses(5,t) = current_trial(6); % trial condition type
-                    log_aud.responses(7,t) = subject_no; % subject id
+                    log_file.responses(2,t) = current_trial(5); % stimuli is the correct target
+                    log_file.responses(5,t) = current_trial(6); % trial condition type
+                    log_file.responses(7,t) = subject_no; % subject id
                   break;
                 
                 end
@@ -557,10 +558,10 @@ for t = 1:1%length(design_mat)
             
             if timedout == 1 %adding information for timedout trial
                 
-                log_aud.responses(2,t) = current_trial(5);  % stimuli matched    
-                log_aud.responses(5,t) = current_trial(6);  % trial condition type
-                log_aud.responses(7,t) = subject_no;           % subject id
-                log_aud.responses(6,t) = 1;                 % timedout: yes
+                log_file.responses(2,t) = current_trial(5);  % stimuli matched    
+                log_file.responses(5,t) = current_trial(6);  % trial condition type
+                log_file.responses(7,t) = subject_no;           % subject id
+                log_file.responses(6,t) = 1;                 % timedout: yes
                 
             end    
             
@@ -580,10 +581,10 @@ for t = 1:1%length(design_mat)
             % show if timedout or correct/incorrect
             if timedout == 1
                 DrawFormattedText(window, 'timed out', 'center', 'center', [1 0 0]);
-            elseif  log_aud.responses(4,t) == 1
-               DrawFormattedText(window, ' + + + ', 'center', 'center', [0 1 0]);
-            elseif log_aud.responses(4,t) == 0
-                DrawFormattedText(window, ' - - - ', 'center', 'center', [1 0 0]);
+            elseif  log_file.responses(4,t) == 1
+               DrawFormattedText(window, ' correct ', 'center', 'center', [0 1 0]);
+            elseif log_file.responses(4,t) == 0
+                DrawFormattedText(window, ' incorrect ', 'center', 'center', [1 0 0]);
             end
             
             % Flip to the screen
@@ -592,7 +593,7 @@ for t = 1:1%length(design_mat)
         end %end showing feedback
         
     %always save log file after every run to have data even if programm crashes
-    save(log_path, 'log_aud');
+    save(log_path, 'log_file');
  
         
     for frame = 1:(numFrames) %short black screen after feedback presentation
@@ -617,7 +618,7 @@ end
 
 for frame = 1:(numFrames*3) %short display of performance for 3 seconds
     
-    DrawFormattedText(window, ['Performance: ', char(string(round((sum(log_aud.responses(4,:))/t)*100, 1))), '%'], 'center', 'center', [0.5 0.5 0.5]);
+    DrawFormattedText(window, ['Performance: ', char(string(round((sum(log_file.responses(4,:))/t)*100, 1))), '%'], 'center', 'center', textColor);
     Screen('Flip', window);
     
 end
@@ -633,7 +634,7 @@ end
 sca;
 
 %final saving of responses
-save(log_path, 'log_aud');
+save(log_path, 'log_file');
 
 
 catch ME
@@ -642,3 +643,4 @@ catch ME
     rethrow(ME);
     
 end
+end 
