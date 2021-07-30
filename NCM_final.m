@@ -40,9 +40,8 @@ sca;
 % interval between the response and the beginning of the next trial).
 
 % general settings for each trial of experiment
-%ITIs             = [3000 4000 5000 6000]; % in ms
+
 Init_Break       = 1000; %when to start the first trial "Anfangspause"
-%stimdur          = 600; %how long is a beep played? 
 stimrate         = 1000;  % Rate of presented beeps in stimphase
 
 ITI = 1; %inter trial (sequence) pause
@@ -59,23 +58,22 @@ repetitions = 1;
 % randomized. Setting correct/incorrect trials, duration of stimulus presentation & rehearsal + condition 
 % (play = 1, hold = 2) 
 
-%30 trials might be better, 5*6=30, 30/3 = 10
+%24 trials might be better, 5*6=30 or 5*12= 60
+% maybe have stimulation duration be set to 9 seconds??
 
-correct   = [1 1 1 1 1 0 0 0 0 0];
-%stimphase = [6 6 8 8 10 10];
-stimphase = [8 8 8 8 8 8 8 8 8 8];
-%refphase  = [6 6 8 8 10 10];
-refphase  = [8 8 8 8 8 8 8 8 8 8];
-condition = [1 1 1 1 1 2 2 2 2 2];
+correct   = [1 1 1 0 0 0];
+stimphase = [6 6 8 8 10 10];
+refphase  = [6 6 8 8 10 10];
+condition = [1 1 1 2 2 2];
 
 % Specification of Trials within one Run
 % 4* 6 = 24 trials, for us 5*10 for 50 trials
 % for ref stim phase no randsample needed if always 8 seconds
-Trials_all =   [1 1 1 1 1 1 1 1 1 1      3 3 3 3 3 3 3 3 3 3    5 5 5 5 5 5 5 5 5 5     4 4 4 4 4 4 4 4 4 4    2 2 2 2 2 2 2 2 2 2;             % Which sequence for trial (condition) = different frequencies
-                stimphase                   stimphase               stimphase               stimphase                stimphase;                 % Stim_dur
-                refphase                    refphase                refphase                refphase                 refphase;                  % Refreshment_dur                
-                randsample(correct,10)  randsample(correct,10)  randsample(correct,10)  randsample(correct,10)  randsample(correct,10);         % Correct/Incorrect
-                randsample(condition,10) randsample(condition,10) randsample(condition,10) randsample(condition,10) randsample(condition,10)];  % which condition will it be?
+Trials_all =   [1 1 1 1 1 1                      3 3 3 3 3 3                 5 5 5 5 5 5            4 4 4 4 4 4                2 2 2 2 2 2;             % Which sequence for trial (condition) = different frequencies
+                randsample(stimphase, 6)    randsample(stimphase, 6)   randsample(stimphase, 6)  randsample(stimphase, 6)  randsample(stimphase, 6);                 % Stim_dur
+                randsample(refphase, 6)     randsample(refphase, 6)    randsample(refphase, 6) randsample(refphase, 6)   randsample(refphase, 6);                  % Refreshment_dur                
+                randsample(correct,6)  randsample(correct,6)  randsample(correct,6)  randsample(correct,6)  randsample(correct,6);         % Correct/Incorrect
+                randsample(condition,6) randsample(condition,6) randsample(condition,6) randsample(condition,6) randsample(condition,6)];  % which condition will it be?
 
             
 % Changing the format of stimphase & refphase from seconds into ms
@@ -93,7 +91,7 @@ clear i Trials_all trial_order;
 
 % Adding Targets to Trial Matrix and adding ITIs
  Trials = [Trials; 
-          randsample(repmat(ITI,1,50),50,0)]; %randsample(repmat(ITIs,1,10) if I have 5 different ITIs
+          randsample(repmat(ITI,1,30),30,0)]; %randsample(repmat(ITIs,1,10) if I have 5 different ITIs
 
       
 % make a vector that specifies when trial begins
@@ -134,7 +132,7 @@ clear Timing Trials i Init_Break ITI correct refphase stimphase condition;
 %% MATLAB-LOGFILE of response collection & design matrix
 log_aud.date         = date;
 log_aud.time         = clock;
-log_aud.responses    = zeros(7,50); 
+log_aud.responses    = zeros(7,30); 
 % 1: RT 
 % 2: correct or incorrect target (1 or 0)
 % 3: response key (right arrow = 1, left arrow = 0)
@@ -143,8 +141,8 @@ log_aud.responses    = zeros(7,50);
 % 6: time-out?
 % 7: subject ID
 
-subject_no    = 1;  
-subject_name  = 'SJ01';
+subject_no    = 2;  
+subject_name  = 'SJ02';
 log_path  = fullfile(pwd, [subject_name, '_Response.mat']);
 save(log_path, 'log_aud'); %saving response collection
 design_path = fullfile(pwd, [subject_name, '_trial_info.mat']);
@@ -154,8 +152,8 @@ save(design_path, 'design_mat') %saving design matrix
 % RESPONSE-BUTTON RANDOMIZATION
 % acccording to randomization Scheme
 if mod(subject_no,2) == 0 % Even numbers
-    yes = 80; % 1 left-Button
-    no =  79; % 2 right-Button
+    yes = 80; % left-Button
+    no =  79; % right-Button
 else
     yes = 79; % right-Button
     no =  80; % left-Button
@@ -282,7 +280,7 @@ slack = Screen('GetFlipInterval', window);
 [xCenter, yCenter] = RectCenter(windowRect);
 
 % Set the text size
-Screen('TextSize', window, 100);
+Screen('TextSize', window, 50);
 
 
 
@@ -317,8 +315,8 @@ tic;  % time counter
 % improve portability of your code acorss operating systems 
 KbName('UnifyKeyNames');
 % specify key names of interest in the study
-activeKeys = [KbName('LeftArrow') KbName('RightArrow') KbName('space') KbName('Return')];
-activeKeys_name = ["LeftArrow" "RightArrow" "Space" "Enter"];
+activeKeys = [KbName('LeftArrow') KbName('RightArrow') KbName('space')];
+activeKeys_name = ["LeftArrow" "RightArrow" "Space"];
 RestrictKeysForKbCheck(activeKeys);
 % set value for maximum time to wait for response (in seconds)
 t2wait = 1.5; 
@@ -344,14 +342,24 @@ for t = 1:1%length(design_mat)
     
     current_trial = design_mat(:,t);
     shuffled_perm = Shuffle(Permutations{current_trial(2)}); %getting index of current sequence and shuffle - do we want shuffle?
-    rep_seq = repmat(shuffled_perm,1,16); %50/3 doesn't work, so maybe 48 trials instead?
+    rep_seq = repmat(shuffled_perm,1,10); %3*10 = 30
     current_seq = rep_seq(1:current_trial(3)/stimrate);
+    display(current_seq)
     rehearsal_dur = current_trial(4)/stimrate;
     % get target tone for play and hold condition, if not correct then take
     % tone right before (ie -1), we could think about randomizing this, so
-    % whcih of the two other sounds from the frequency sequence is taken
-    Beep_play = rep_seq((length(current_seq)+rehearsal_dur)-1+current_trial(5));
-    Beep_hold = current_seq(end-1+current_trial(5));
+    % which of the two other sounds from the frequency sequence is taken
+   
+    mismatch_seq_hold = current_seq(end-2:end-1)
+    mismatch_hold_target = mismatch_seq_hold(randperm(length(mismatch_seq_hold), 1))
+    idx_play = (length(current_seq)+rehearsal_dur)-1
+    mismatch_seq_play = rep_seq(idx_play-2:idx_play)
+    mismatch_seq_play = mismatch_seq_play(end-2:end-1)
+    mismatch_play_target = mismatch_seq_play(randperm(length(mismatch_seq_play), 1))
+    display(mismatch_play_target)
+    play_target = rep_seq((length(current_seq)+rehearsal_dur)-1) %+current_trial(5));
+    hold_target = current_seq(end); %-1+current_trial(5)
+    display(hold_target)
     tStart = toc;
     ListenChar(2) 
     
@@ -360,7 +368,7 @@ for t = 1:1%length(design_mat)
         end
         % Start screen 
        % Screen('DrawText',window,'Press the space bar to begin', (xCenter), (yCenter), textColor);
-        DrawFormattedText(window, 'Press the space bar to begin', (xCenter), (yCenter), textColor);
+        DrawFormattedText(window, 'Press the space bar to begin', (xCenter-300), (yCenter), textColor);
         Screen('Flip',window)
         % Wait for subject to press spacebar
         while 1
@@ -482,13 +490,24 @@ for t = 1:1%length(design_mat)
         else
             
             % target presentation
-            if current_trial(6) == 1 %play condition 
-                
-                PsychPortAudio('FillBuffer', pahandle, [Beeps{Beep_play}; Beeps{Beep_play}]);
+            if current_trial(6) == 1 %play condition
+                 
+                if current_trial(5) == 1
+                    PsychPortAudio('FillBuffer', pahandle, [Beeps{play_target}; Beeps{play_target}]);
+                else
+                    PsychPortAudio('FillBuffer', pahandle, [Beeps{mismatch_play_target}; Beeps{mismatch_play_target}]);
+                end
             
+                  
+            % hold condition
             else
                 
-                PsychPortAudio('FillBuffer', pahandle, [Beeps{Beep_hold}; Beeps{Beep_hold}]);
+               if current_trial(5) == 1
+                    PsychPortAudio('FillBuffer', pahandle, [Beeps{hold_target}; Beeps{hold_target}]);
+                else
+                    PsychPortAudio('FillBuffer', pahandle, [Beeps{mismatch_hold_target}; Beeps{mismatch_hold_target}]);
+                end
+            
                 
             end    
             
