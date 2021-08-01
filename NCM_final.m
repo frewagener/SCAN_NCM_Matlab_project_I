@@ -4,7 +4,7 @@ clearvars;
 close all;
 clear all; 
 sca;
-log_file = Participant_input()
+log_file = Participant_input();
 %% *******************************************************************
 %                       INTRODUCTION
 %*********************************************************************
@@ -45,7 +45,7 @@ log_file = Participant_input()
 Init_Break       = 1000; %when to start the first trial "Anfangspause"
 stimrate         = 1000;  % Rate of presented beeps in stimphase
 
-ITI = 1; %inter trial (sequence) pause
+ITI = 2.5; %inter trial (sequence) pause
 %ISI = 0.2; %inter stimulus pause 
 trials = 2    ; %number of trials
 beepPauseTime = 0.2; %Pause between beeps, maybe 0.4 instead?
@@ -102,7 +102,7 @@ Timing = [Init_Break];    % Start of first trial after X seconds
 
 for i = 1:(length(Trials)-1)
                 %last_onset + Sequence    + Rehearsal      + Response +  ITI
-    next_onset = Timing(i)  + Trials(2,i) + Trials(3,i) + 1500     + Trials(5,i); % Adding of time
+    next_onset = Timing(i)  + Trials(2,i) + Trials(3,i) + 2000     + Trials(5,i); % Adding of time
 
     Timing(i+1) = next_onset; 
     clear next_onset;
@@ -149,17 +149,6 @@ save(log_path, 'log_file'); %saving response collection
 design_path = fullfile(pwd, [subject_name, '_trial_info.mat']);
 save(design_path, 'design_mat') %saving design matrix 
 
-
-% RESPONSE-BUTTON RANDOMIZATION
-% acccording to randomization Scheme
-if mod(subject_no,2) == 0 % Even numbers
-    yes = 80; % left-Button
-    no =  79; % right-Button
-else
-    yes = 79; % right-Button
-    no =  80; % left-Button
-    
-end
 
 
 % NOTE: response time currently seems too little! Also not sure if
@@ -243,15 +232,7 @@ PsychDefaultSetup(2);
 backgroundColor = 0;
 % Text color: choose a number from 0 (black) to 255 (white)
 textColor = 255;
-%%our old settings 
-%whichScreen = min(Screen('Screens'));
-%[window, rect] = Screen('Openwindow',whichScreen,backgroundColor,[],[],2);
-%slack = Screen('GetFlipInterval', window);
-%Screen('TextSize', window, 25);
-%W=rect(RectRight); % screen width
-%H=rect(RectBottom) ; % screen height
-%Screen(window,'FillRect',backgroundColor);
-%Screen('Flip', window);
+
 %%
 
 
@@ -259,6 +240,7 @@ textColor = 255;
 screens = Screen('Screens');
 
 screenNumber = max(screens);
+PsychDebugWindowConfiguration(0, 0.5);
 
 
 % Open an on screen window with black background color
@@ -323,44 +305,34 @@ RestrictKeysForKbCheck(activeKeys);
 t2wait = 1.5; 
 
 %% Run experiment 
-% Start screen 
-%Screen('DrawText',window,'Press the space bar to begin', (W/2), (H/2), textColor);
-%Screen('Flip',window)
-% Wait for subject to press spacebar
-%while 1
-%    [keyIsDown,secs,keyCode] = KbCheck;
-%    if keyCode(KbName('space'))==1
-%        break 
-%    end 
-%end
-
-
-% whether the correct target tone will be outputted or not
-%correct_or_false = [zeros(1, trials / 2) ones(1, trials / 2)];
-%correct_or_false = correct_or_false(randperm(length(correct_or_false)));
-
-for t = 1:1%length(design_mat)
+for t = 1:length(design_mat)
     
+    %% Creating a vector with the presented tones
     current_trial = design_mat(:,t);
-    shuffled_perm = Shuffle(Permutations{current_trial(2)}); %getting index of current sequence and shuffle - do we want shuffle?
+    shuffled_perm = Shuffle(Permutations{current_trial(2)});%getting index of current sequence and shuffle - do we want shuffle?
+    both_stim_reh = (current_trial(3)+current_trial(4))/1000;
     rep_seq = repmat(shuffled_perm,1,10); %3*10 = 30
+    whole_seq = rep_seq(1:both_stim_reh);
     current_seq = rep_seq(1:current_trial(3)/stimrate);
-    display(current_seq)
+    disp(current_seq)
+    disp(whole_seq)
     rehearsal_dur = current_trial(4)/stimrate;
-    % get target tone for play and hold condition, if not correct then take
-    % tone right before (ie -1), we could think about randomizing this, so
-    % which of the two other sounds from the frequency sequence is taken
+    
+  
    
-    mismatch_seq_hold = current_seq(end-2:end-1)
-    mismatch_hold_target = mismatch_seq_hold(randperm(length(mismatch_seq_hold), 1))
-    idx_play = (length(current_seq)+rehearsal_dur)-1
-    mismatch_seq_play = rep_seq(idx_play-2:idx_play)
-    mismatch_seq_play = mismatch_seq_play(end-2:end-1)
-    mismatch_play_target = mismatch_seq_play(randperm(length(mismatch_seq_play), 1))
-    display(mismatch_play_target)
-    play_target = rep_seq((length(current_seq)+rehearsal_dur)-1) %+current_trial(5));
-    hold_target = current_seq(end); %-1+current_trial(5)
-    display(hold_target)
+    %% Hold conditions Targets/Mismatch
+    hold_idx = (current_trial(3)/1000);
+    mismatch_seq_hold = current_seq(hold_idx-2:hold_idx-1);
+    mismatch_hold_target = mismatch_seq_hold(randperm(length(mismatch_seq_hold), 1));
+    hold_target = current_seq(current_trial(3)/1000); %-1+current_trial(5)
+    sprintf('Hold target: %d',hold_target)
+    
+    %% Play condition Targets/Mismatch
+    play_idx = (current_trial(3)/1000) + (current_trial(4)/1000);
+    mismatch_seq_play = whole_seq(play_idx-2:play_idx-1);
+    mismatch_play_target = mismatch_seq_play(randperm(length(mismatch_seq_play), 1));
+    play_target = whole_seq(play_idx); %-1+current_trial(5)
+    sprintf('Play target: %d',play_target)
     tStart = toc;
     ListenChar(2) 
     
@@ -369,7 +341,7 @@ for t = 1:1%length(design_mat)
         end
         % Start screen 
        % Screen('DrawText',window,'Press the space bar to begin', (xCenter), (yCenter), textColor);
-        DrawFormattedText(window, 'Left arrow = Mismatch \n Right arrow = Match \n Press the space bar to begin', (xCenter-300), (yCenter), textColor);
+        DrawFormattedText(window, 'Right arrow = Match\n Left arrow = Mismatch\n Press the space bar to begin', (xCenter-300), (yCenter), textColor);
         Screen('Flip',window)
         % Wait for subject to press spacebar
         while 1
