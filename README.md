@@ -1,6 +1,9 @@
 # SCAN_NCM_Matlab_project_I
 In the current github repository there are scripts for the creation of a Working Memory Experiment. 
 
+![Experimental Design](https://github.com/frewagener/SCAN_NCM_Matlab_project_I/blob/main/Exp_Design/Experimental_Design.png)
+  
+
 **PARADIGM:**<br/>
 This script implements a rehearsal/refreshment task. 
 There is eight different stimuli
