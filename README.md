@@ -24,3 +24,11 @@ or not.
 
 **OUTPUTS:**<br/>
 A MATLAB-Logfile is generated (to be used for the Data analysis)
+
+
+**What you will find in each folder: **<br/>
+**Creating_stimuli** has a necessary function and a script, which contain out stimuli selection for the purpose of the experiment.<br/>
+**Exp_Design** contains the schematic overview of our experiment.<br/>
+**Log_files** contains all of the log files produced from our work and a script which makes plots based on the log files.<br/>
+The file **NCM_final** is the actual experiment it needs to be together with particiapnt input. 
+
